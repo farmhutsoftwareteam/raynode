@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/006fe25a-f4b5-4fba-995b-bfbbd32d9f78/AppServices/subscriptions/006fe25a-f4b5-4fba-995b-bfbbd32d9f78/resourceGroups/raysunbackend_group/providers/Microsoft.Web/sites/raysun",
+    "appService.deploySubpath": "."
+}
