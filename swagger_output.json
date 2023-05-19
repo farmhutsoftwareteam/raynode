@@ -5,10 +5,10 @@
     "title": "REST API",
     "description": ""
   },
-  "host": "https://raysun.azurewebsites.net/",
+  "host": "localhost:3000",
   "basePath": "/",
   "schemes": [
-    "https"
+    "http"
   ],
   "paths": {
     "/": {
@@ -22,7 +22,7 @@
         }
       }
     },
-    "/question": {
+    "/conversation": {
       "post": {
         "description": "",
         "parameters": [
@@ -32,7 +32,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "prompt": {
+                "input": {
                   "example": "any"
                 }
               }
@@ -56,10 +56,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "password": {
+                "username": {
                   "example": "any"
                 },
-                "email": {
+                "phone": {
                   "example": "any"
                 }
               }
@@ -89,7 +89,7 @@
                 "username": {
                   "example": "any"
                 },
-                "password": {
+                "phone": {
                   "example": "any"
                 }
               }
@@ -106,6 +106,30 @@
         }
       }
     },
+    "/user/users/{id}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/user/wallet/balance": {
       "get": {
         "description": "",
@@ -116,6 +140,20 @@
           },
           "400": {
             "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/user/users": {
+      "get": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -373,6 +411,48 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/loan/civil-servant": {
+      "post": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/loan/non-civil-servant": {
+      "post": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/loan/government-pensioner": {
+      "post": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }

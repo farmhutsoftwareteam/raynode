@@ -3,22 +3,23 @@ const {Schema, model} = require("../db/connection") // import Schema & model
 
 // User Schema
 const UserSchema = new Schema({
-    email: {type: String, unique: true, required: true},
-    username: {type: String, unique: true, required: true},
-    password: {type: String, required: true},
-    wallet: {
-        balance: {
-          type: Number,
-          required: true,
-          default: 0
-        },
-        transactions: [
-          {
-            type: Schema.Types.ObjectId,
-            ref: "Transaction"
-          }
-        ]
-      }
+  email: {type: String, required: false}, // remove 'unique: true' if you want to allow non-unique emails
+  phone: { type: String, unique: true, required: true}, // 'unique: true' will enforce uniqueness
+  username: {type: String, unique: true, required: true}, // 'unique: true' will enforce uniqueness
+  password: {type: String, required: false},
+  wallet: {
+      balance: {
+        type: Number,
+        required: true,
+        default: 0
+      },
+      transactions: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "Transaction"
+        }
+      ]
+    }
 });
 
 UserSchema.pre('save', function(next) {

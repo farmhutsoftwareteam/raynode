@@ -25,36 +25,17 @@ const { SECRET = "secret" } = process.env;
 
 router.post("/signup", async (req, res) => {
   try {
-    // hash the password
-    req.body.password = await bcrypt.hash(req.body.password, 10);
-
-    // Collect email from the request
-    const email = req.body.email;
+    // check if username or phone already exists
+    const existingUser = await User.findOne({ $or: [{username: req.body.username}, {phone: req.body.phone}] });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username or phone already exists.' });
+    }
 
     // create a new user
-    const user = await User.create({...req.body, email});
-
-   
-
-    //send email notification to admin
-
-  
-  let mailOptions = {
-      from: 'github@kwingy.com',
-      to: 'munya@kwingy.com, brian.munyawarara@raysuncapital.com, munya@farmhutafrica.com ',
-      subject: 'New user signup RaysunCapital',
-      text: `A new user has signed up to Raysun Capital. Their email is ${email}.`
-  };
-  transporter.sendMail(mailOptions, function(error, info){
-      if (error) {
-          console.log(error);
-      } else {
-          console.log('Email sent: ' + info.response);
-      }
-  });
+    const user = await User.create(req.body);
 
     // sign token and send it in response
-    const token = await jwt.sign({ username: user.username, email: user.email }, SECRET);
+    const token = await jwt.sign({ id: user._id, username: user.username, phone: user.phone }, SECRET);
     const userId = user._id;
     res.json({ user, token, userId });
   } catch (error) {
@@ -63,30 +44,48 @@ router.post("/signup", async (req, res) => {
 });
 
 
+
+
+
+
+
 //login to verify user
 
 router.post("/login", async (req, res) => {
   try {
-    // check if the user exists
-    const user = await User.findOne({ username: req.body.username });
-    if (user) {
-      //check if password matches
-      const result = await bcrypt.compare(req.body.password, user.password);
-      if (result) {
-        // sign token and send it in response
-        const token = await jwt.sign({ id: user._id, username: user.username }, SECRET);
-        const userResponse = {...user.toObject(), token};
-        res.json(userResponse);
-      } else {
-        res.status(400).json({ error: "password doesn't match" });
-      }
-    } else {
+    const user = await User.findOne({ $or: [{ username: req.body.username }, { phone: req.body.phone }] });
+
+    if (!user) {
       res.status(400).json({ error: "User doesn't exist" });
+      return;
     }
+
+    const token = await jwt.sign({ id: user._id, username: user.username, phone: user.phone }, SECRET);
+    // Exclude the password from the response
+    user.password = undefined;
+    const userResponse = {...user.toObject(), token};
+    res.json(userResponse);
+
   } catch (error) {
-    res.status(400).json({ error });
+    res.status(400).json({ error: error.message });
   }
 });
+
+
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 router.get("/wallet/balance", async (req, res) => {
   try {
@@ -98,6 +97,19 @@ router.get("/wallet/balance", async (req, res) => {
     res.json({ balance: wallet.balance });
   } catch (error) {
     res.status(400).json({ error });
+  }
+});
+
+router.get("/users", async (req, res) => {
+  try {
+    // Fetch all users from the database
+    const users = await User.find();
+
+    // Return the list of users
+    res.json(users);
+  } catch (error) {
+    // If there was an error, return it
+    res.status(500).json({ error });
   }
 });
 

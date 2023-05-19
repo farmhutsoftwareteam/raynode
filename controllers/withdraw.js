@@ -10,16 +10,16 @@ const transporter = nodemailer.createTransport({
     port: 587,
     secure: false,
     auth: {
-      user: 'github@kwingy.com',
-      pass: 'GitHub2022.'
-    },
+        user: 'postmaster@raysuncapital.com',
+        pass: '94f23350b2c98b77cdebb4d6c679f50f-2cc48b29-5ac91304'
+      },
     tls: {
       ciphers: 'SSLv3'
     }
   });
   const sendWithdrawalRequestEmail = async (user, amount) => {
     const mailOptions = {
-        from: "github@kwingy.com",
+        from: "ray@raysuncapital.com",
         to: "munya@kwingy.com, brian.munyawarara@raysuncapital.com, munya@farmhutafrica.com",
         subject: "Withdrawal Request",
         text: `A user ${user.username} with email ${user.email} has requested to withdraw ${amount}.`
