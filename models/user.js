@@ -3,8 +3,9 @@ const {Schema, model} = require("../db/connection") // import Schema & model
 
 // User Schema
 const UserSchema = new Schema({
-  email: {type: String, required: false}, // remove 'unique: true' if you want to allow non-unique emails
+  email: {type: String, required: false, default: 'munya@zimyellow.com'}, // remove 'unique: true' if you want to allow non-unique emails
   phone: { type: String, unique: true, required: true}, // 'unique: true' will enforce uniqueness
+  type: { type: String, required: true }, // User type (admin, personal, trucker, company)
   username: {type: String, unique: true, required: true}, // 'unique: true' will enforce uniqueness
   password: {type: String, required: false},
   wallet: {

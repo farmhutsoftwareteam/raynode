@@ -4,6 +4,7 @@ const User = require("../models/User"); // import user model
 const bcrypt = require("bcryptjs"); // import bcrypt to hash passwords
 const jwt = require("jsonwebtoken"); // import jwt to sign tokens
 const nodemailer = require('nodemailer');
+
 const transporter = nodemailer.createTransport({
   host: 'smtp.titan.email',
   port: 587,
@@ -19,6 +20,9 @@ const transporter = nodemailer.createTransport({
 
 
 const router = Router(); // create router to create route bundle
+const mixpanel = require('mixpanel');
+const mixpanelToken = 'c08415fd158425a0180c1036e50af0e0';
+const mixpanelClient = mixpanel.init(mixpanelToken);
 
 //DESTRUCTURE ENV VARIABLES WITH DEFAULTS
 const { SECRET = "secret" } = process.env;
@@ -37,6 +41,14 @@ router.post("/signup", async (req, res) => {
     // sign token and send it in response
     const token = await jwt.sign({ id: user._id, username: user.username, phone: user.phone }, SECRET);
     const userId = user._id;
+
+    mixpanelClient.track('Signup', {
+      distinct_id: userId,
+      username: user.username,
+      phone: user.phone,
+      signupDate: new Date().toISOString()
+
+    });
     res.json({ user, token, userId });
   } catch (error) {
     res.status(400).json({ error });
@@ -64,6 +76,11 @@ router.post("/login", async (req, res) => {
     // Exclude the password from the response
     user.password = undefined;
     const userResponse = {...user.toObject(), token};
+    mixpanelClient.track('Login', {
+      distinct_id: user._id,
+      username: user.username,
+      phone: user.phone
+    });
     res.json(userResponse);
 
   } catch (error) {
