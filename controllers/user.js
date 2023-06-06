@@ -4,18 +4,43 @@ const User = require("../models/User"); // import user model
 const bcrypt = require("bcryptjs"); // import bcrypt to hash passwords
 const jwt = require("jsonwebtoken"); // import jwt to sign tokens
 const nodemailer = require('nodemailer');
+const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
+const passport = require('passport');
+
+
+// Configure Google OAuth
+passport.use(new GoogleStrategy({
+  clientID: "646997794108-0tigki923rd8kjs1okkaopfvk0q4ip22.apps.googleusercontent.com ",
+  clientSecret: "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",
+  callbackURL: "/auth/google/callback"
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    // Check if the user already exists in the database
+    let user = await User.findOne({ googleId: profile.id });
+
+    if (!user) {
+      // If the user doesn't exist, create a new user
+      user = await User.create({
+        googleId: profile.id,
+        username: profile.displayName,
+        email: profile.emails[0].value
+      });
+    }
+
+    return done(null, user);
+  } catch (error) {
+    return done(error);
+  }
+}));
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.titan.email',
-  port: 587,
+  host: 'smtp.elasticemail.com',
+  port: 2525,
   secure: false,
   auth: {
-    user: 'github@kwingy.com',
-    pass: 'GitHub2022.'
+    user: 'ray@raysuncapital.com',
+    pass: 'C623EEFECACB8B8BBB11FEAE1927262519AF',
   },
-  tls: {
-    ciphers: 'SSLv3'
-  }
 });
 
 
@@ -26,6 +51,15 @@ const mixpanelClient = mixpanel.init(mixpanelToken);
 
 //DESTRUCTURE ENV VARIABLES WITH DEFAULTS
 const { SECRET = "secret" } = process.env;
+
+// Google OAuth route
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+// Google OAuth callback route
+router.get("/auth/google/callback", passport.authenticate("google", {
+  successRedirect: "/dashboard",
+  failureRedirect: "/login"
+}));
 
 router.post("/signup", async (req, res) => {
   try {
