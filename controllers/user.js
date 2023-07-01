@@ -9,7 +9,7 @@ const passport = require('passport');
 
 // Configure Google OAuth
 passport.use(new GoogleStrategy({
-  clientID: "     646997794108-0tigki923rd8kjs1okkaopfvk0q4ip22.apps.googleusercontent.com ",
+  clientID: "646997794108-0tigki923rd8kjs1okkaopfvk0q4ip22.apps.googleusercontent.com",
   clientSecret: "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",
   callbackURL: "https://raysun.azurewebsites.net/user/auth/google/callback",
   scope: ["profile", "email"]
@@ -49,7 +49,7 @@ const mixpanelClient = mixpanel.init(mixpanelToken);
 const { SECRET = "secret" } = process.env;
 
 // Google OAuth route
-router.get("https://raysun.azurewebsites.net/user/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+router.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 // Google OAuth callback route
 router.get("/auth/google/callback", passport.authenticate("google", {

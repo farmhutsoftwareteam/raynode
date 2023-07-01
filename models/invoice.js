@@ -7,6 +7,9 @@ const InvoiceSchema = new Schema({
     email: { type: String, required: true },
     phone: { type: String, required: true },
     address: { type: String, required: true },
+    companybank: { type: String },
+    accnumber: { type: String},
+    branch: { type: String}
   },
   date: { type: Date, default: Date.now },
   dueDate: { type: Date, required: true },
