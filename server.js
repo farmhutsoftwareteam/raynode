@@ -12,7 +12,7 @@ const { Configuration, OpenAIApi} = require("openai")
 const mixpanel = require('mixpanel');
 const mixpanelToken = 'c08415fd158425a0180c1036e50af0e0';
 const mixpanelClient = mixpanel.init(mixpanelToken);
-
+const LoanApplication = require('./controllers/LoanApplication');
 const loanRoutes = require('./controllers/PersonalLoans');
 
 
@@ -81,7 +81,7 @@ app.use('/withdraw', withdrawRouter);
 app.use('/api', loanRoutes);
 
 
-
+app.use("/loan", LoanApplication) // send all "/loan" requests to LoanApplication for routing
 
 // Define an empty object to store conversation histories
 const userConversations = {};
