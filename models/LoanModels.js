@@ -2,8 +2,8 @@ const {Schema, model} = require("../db/connection");
 require("dotenv").config()
 
 const CivilServantLoanSchema = new Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
+  fullName: { type: String, required: true },
+  
   dob: { type: Date, required: true },
   idNumber: { type: String, required: true },
   nationality: { type: String, required: true },

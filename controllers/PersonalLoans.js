@@ -14,8 +14,8 @@ const authenticateUser = require("../middleware/auth");
 const mixpanel = require('mixpanel');
 const mixpanelToken = 'c08415fd158425a0180c1036e50af0e0';
 const mixpanelClient = mixpanel.init(mixpanelToken);
-const generateLoanPDF = async (loan, fullName) => {
-  const pdfTemplatePath = path.join(__dirname, '../public/pdfTemplates/raysunloan.pdf');
+const generateLoanPDF = async (loan) => {
+  const pdfTemplatePath = path.join(__dirname, '../public/pdfTemplates/RaysunUpdated.pdf');
   const outputPath = path.join(__dirname, '../public/generatedPDFs', `${loan._id}.pdf`);
 
   // Load the PDF template
@@ -27,26 +27,11 @@ const generateLoanPDF = async (loan, fullName) => {
   // Fill the form fields with loan data
   formFields.forEach((field) => {
     const fieldName = field.getName();
+    const fieldValue = loan[fieldName]; // Assuming field names match the loan property names
 
-    // Check if the field name matches the loan data property
-    if (fieldName === 'Date') {
-      field.setText(new Date().toLocaleDateString());
-    } else if (fieldName === 'fullName') {
-      field.setText(fullName);
-    } else if (fieldName === 'idNumber') {
-      field.setText(loan.idNumber);
-    } else if (fieldName === 'phoneNumber') {
-      field.setText(loan.phoneNumber);
-    } else if (fieldName === 'email') {
-      field.setText(loan.email);
-    } else if (fieldName === 'ecNumber') {
-      field.setText(loan.ecNumber);
-    } else if (fieldName === 'loanType') {
-      field.setText('Civil Servant Loan');
-    } else if (fieldName === 'loanTenure') {
-      field.setText(loan.loanTenure.toString());
+    if (fieldValue !== undefined) {
+      field.setText(fieldValue.toString());
     }
-    // Add more conditions for other fields if needed
   });
 
   // Save the filled PDF to the output path
@@ -55,6 +40,7 @@ const generateLoanPDF = async (loan, fullName) => {
 
   return outputPath;
 };
+
 
 
 
