@@ -4,7 +4,7 @@ const router = express.Router();
 const axios = require('axios');
 const path = require('path')
 
-const { PDFDocument, rgb } = require("pdf-lib");
+
 const PDFLib = require('pdf-lib');
 
 
