@@ -3,11 +3,14 @@ require("dotenv").config()
 
 const CivilServantLoanSchema = new Schema({
   fullName: { type: String, required: true },
-  
-  dob: { type: Date, required: true },
+  date: {type: Date, default:Date.now },
+  dob: { type: String,required: true },
   idNumber: { type: String, required: true },
   nationality: { type: String, required: true },
   gender: { type: String, required: true },
+  position: { type: String },
+  grossIncome: { type : String},
+  netIncome: { type : String},
   maritalStatus: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   email: { type: String, required: true },
@@ -40,8 +43,9 @@ const CivilServantLoanSchema = new Schema({
 
 const NonCivilServantLoanSchema = new Schema({
   firstName: { type: String, required: true },
+  date: {type: Date, default:Date.now },
   lastName: { type: String, required: true },
-  dob: { type: Date, required: true },
+  dob: { type: String },
   idNumber: { type: String, required: true },
   nationality: { type: String, required: true },
   gender: { type: String, required: true },
@@ -76,8 +80,9 @@ const NonCivilServantLoanSchema = new Schema({
 });
 
 const GovernmentPensionerLoanSchema = new Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
+  fullName: { type: String, required: true },
+  date: {type: Date, default:Date.now },
+  
   dob: { type: Date, required: true },
   idNumber: { type: String, required: true },
   nationality: { type: String, required: true },

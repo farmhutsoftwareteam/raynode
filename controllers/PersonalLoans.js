@@ -15,7 +15,7 @@ const mixpanel = require('mixpanel');
 const mixpanelToken = 'c08415fd158425a0180c1036e50af0e0';
 const mixpanelClient = mixpanel.init(mixpanelToken);
 const generateLoanPDF = async (loan) => {
-  const pdfTemplatePath = path.join(__dirname, '../public/pdfTemplates/RaysunUpdated.pdf');
+  const pdfTemplatePath = path.join(__dirname, '../public/pdfTemplates/RaysunUpdated1.pdf');
   const outputPath = path.join(__dirname, '../public/generatedPDFs', `${loan._id}.pdf`);
 
   // Load the PDF template
@@ -28,6 +28,11 @@ const generateLoanPDF = async (loan) => {
   formFields.forEach((field) => {
     const fieldName = field.getName();
     const fieldValue = loan[fieldName]; // Assuming field names match the loan property names
+    if (fieldName === 'dob') {
+      field.setText(fieldValue); // Use the converted dob string
+    } else if (fieldValue !== undefined) {
+      field.setText(fieldValue.toString());
+    };
 
     if (fieldValue !== undefined) {
       field.setText(fieldValue.toString());
