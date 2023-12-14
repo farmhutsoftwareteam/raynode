@@ -5,7 +5,7 @@ const {log} = require("mercedlogger");
 const { v4: uuidv4 } = require('uuid'); 
 const cors = require("cors");
 const UserRouter = require("./controllers/user");
-const { PORT=3000 } = process.env;
+
 const invoiceRoutes = require('./routes/invoice');
 const userInfoRouter = require('./routes/userInfo');
 const withdrawRouter = require('./routes/withdraw');
