@@ -19,7 +19,7 @@ const ResponseSchema = require('./models/response')
 
 
 const openai = new OpenAI({
-  apiKey: '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',
+  apiKey: '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',
 });
 
 
@@ -113,7 +113,7 @@ app.post('/api/testai', async (req, res) => {
 
 app.post('/api/assistant', async (req, res) => {
   const { prompt } = req.body;
-  const userId = uuidv4();
+  const {userId } = req.body
 
   // Check and initialize user conversation history
   if (!userConversations[userId]) {
