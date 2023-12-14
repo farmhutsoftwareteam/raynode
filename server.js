@@ -91,7 +91,7 @@ app.post('/api/testai', async (req, res) => {
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4-1106-preview",
+      model: "gpt-3.5-turbo-16k",
       prompt: prompt,
       temperature: 1,
       max_tokens: 256,
@@ -133,7 +133,7 @@ app.post('/api/assistant', async (req, res) => {
     console.log('Sending request to OpenAI:', userConversations[userId]); // Log the conversation history being sent
 
     const gptResponse = await openai.chat.completions.create({
-      model: "gpt-4-1106-preview",
+      model: "gpt-3.5-turbo-16k",
       messages: userConversations[userId]
     });
 
