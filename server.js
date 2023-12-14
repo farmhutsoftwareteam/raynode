@@ -19,7 +19,7 @@ const ResponseSchema = require('./models/response')
 
 
 const openai = new OpenAI({
-  apiKey: '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',
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 
