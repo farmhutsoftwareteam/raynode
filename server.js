@@ -9,7 +9,7 @@ const { PORT=3000 } = process.env;
 const invoiceRoutes = require('./routes/invoice');
 const userInfoRouter = require('./routes/userInfo');
 const withdrawRouter = require('./routes/withdraw');
-const { Configuration, OpenAIApi} = require("openai")
+const { OpenAI} = require("openai")
 const mixpanel = require('mixpanel');
 const mixpanelToken = 'c08415fd158425a0180c1036e50af0e0';
 const mixpanelClient = mixpanel.init(mixpanelToken);
@@ -18,12 +18,11 @@ const loanRoutes = require('./controllers/PersonalLoans');
 const ResponseSchema = require('./models/response')
 
 
+const openai = new OpenAI({
+  apiKey: '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',
+});
 
 
-const configuration = new Configuration({
-    apiKey: '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'
-})
-const openai = new OpenAIApi(configuration);
 
 const swaggerFile = require('./swagger_output.json') //documentation
 const swaggerUi = require('swagger-ui-express') //ui for api
@@ -91,8 +90,8 @@ app.post('/api/testai', async (req, res) => {
   const prompt = req.body.prompt;
 
   try {
-    const response = await openai.createCompletion({
-      model: "text-davinci-003",
+    const response = await openai.chat.completions.create({
+      model: "gpt-4-1106-preview",
       prompt: prompt,
       temperature: 1,
       max_tokens: 256,
@@ -113,66 +112,52 @@ app.post('/api/testai', async (req, res) => {
 });
 
 app.post('/api/assistant', async (req, res) => {
-  const {prompt } = req.body;
+  const { prompt } = req.body;
   const userId = uuidv4();
-  const requestId = uuidv4();
 
-   // Check if the user's conversation history exists, otherwise initialize it as an empty array
-   if (!userConversations[userId]) {
-    // Pre-fill conversation history with a system message
-    userConversations[userId] = [
-      {
-        "role": "system",
-        "content": "You are an AI assistant that helps users with agriculture"
-      }
-    ];
+  // Check and initialize user conversation history
+  if (!userConversations[userId]) {
+    userConversations[userId] = [{
+      role: "system",
+      content: "You are a helpful assistant that will assist users to apply for loans, and also give them financial advice.To apply for a loan at Raysun a person is supposed to message the Raysun bot on whatsapp, and click on new application, they will answer the questions and then they will receive a call from the office to get their loan processed within a day. You are also to alert the user of your capabilities as soon as they greet you, which range from the ability to help a user understand the financial landscape and rules around civil servant loans in zimbabwe"
+    }];
   }
 
-  
-  
-  // Add the user's message to their conversation history
-  userConversations[userId].push({
-    "role": "user",
-    "content": prompt
-  });
-   // Track user message event in Mixpanel
-   mixpanelClient.track('User Message', {
-    distinct_id: userId, // Assuming userId is available in the request body
-    message: prompt
-  });
-  console.log('Request body:', req.body);
-  const gptResponse = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo-16k-0613",
-    
+  // Add user message to conversation history
+  userConversations[userId].push({ role: "user", content: prompt });
 
-    messages: userConversations[userId] // Use the user's conversation history
-  });
-  
-  console.log('gptResponse: ', gptResponse); // Log the entire response
-  console.log('gptResponse.data.choices[0]: ', gptResponse.data.choices[0]); // Log the first choice
+  // Track user message in Mixpanel
+  mixpanelClient.track('User Message', { distinct_id: userId, message: prompt });
 
-  // Check if choices and message exist in the response
-  if (gptResponse && gptResponse.data && gptResponse.data.choices && gptResponse.data.choices[0] && gptResponse.data.choices[0].message) {
-    const assistantReply = gptResponse.data.choices[0].message.content;
-    const message = assistantReply;
+  try {
+    console.log('Sending request to OpenAI:', userConversations[userId]); // Log the conversation history being sent
 
-    
-  
-    // Add the assistant's reply to the user's conversation history
-    userConversations[userId].push({
-      "role": "assistant",
-      "content": assistantReply
+    const gptResponse = await openai.chat.completions.create({
+      model: "gpt-4-1106-preview",
+      messages: userConversations[userId]
     });
-// Track assistant reply event in Mixpanel
-mixpanelClient.track('Assistant Reply', {
-  distinct_id: userId, // Assuming userId is available in the request body
-  message: assistantReply
-});
-    res.send({ 'bot' : message });
-  } else {
-    res.status(500).send({ 'error': 'Unexpected response from OpenAI API' });
+
+    console.log('gptResponse:', gptResponse); // Log full response from OpenAI
+
+    if (gptResponse.choices && gptResponse.choices.length > 0 && gptResponse.choices[0].message) {
+      const assistantReply = gptResponse.choices[0].message.content;
+
+      // Add assistant reply to conversation history and track in Mixpanel
+      userConversations[userId].push({ role: "assistant", content: assistantReply });
+      mixpanelClient.track('Assistant Reply', { distinct_id: userId, message: assistantReply });
+
+      res.send({ 'bot': assistantReply });
+    } else {
+      console.log('No valid response in gptResponse:', gptResponse); // Log if response structure is unexpected
+      res.status(500).send({ 'error': 'No valid response from OpenAI API' });
+    }
+  } catch (error) {
+    console.error('Error during API call:', error); // Log the error details
+    res.status(500).send({ 'error': 'Error processing request', details: error });
   }
 });
+
+
 
 
 
