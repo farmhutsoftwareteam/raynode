@@ -365,10 +365,9 @@ async function saveAssistantResponse(requestId, prompt, assistantReply) {
 
 
 
-app.listen(PORT, () => {
-    log.green(`Server is listening on port ${PORT}`);
-}
-);
+app.listen(process.env.PORT || 8080, () => {
+    log.green(`Server is listening on port ${process.env.PORT || 8080}`);
+});
 
 
 
