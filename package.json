@@ -32,7 +32,8 @@
     "swagger-autogen": "^2.22.0",
     "swagger-jsdoc": "^6.2.7",
     "swagger-ui-express": "^4.6.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "yahoo-finance2": "^2.9.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
