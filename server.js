@@ -17,6 +17,7 @@ const LoanApplication = require('./controllers/LoanApplication');
 const loanRoutes = require('./controllers/PersonalLoans');
 const ResponseSchema = require('./models/response')
 const chatRouter = require('./routes/chatbot')
+const latestMessage = require('./routes/lastestmessage')
 
 
 const openai = new OpenAI({
@@ -159,7 +160,7 @@ app.post('/api/assistant', async (req, res) => {
 });
 
 app.use('/chat', chatRouter);
-
+app.use('/', latestMessage);
 
 
 
