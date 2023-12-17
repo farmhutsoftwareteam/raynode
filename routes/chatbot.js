@@ -154,6 +154,45 @@ async function main(userQuery, userId) {
     }
 }
 
+async function processUserQuery(userQuery, userId) {
+    try {
+        let threadId = await getStoredThreadId(userId);
+        if (!threadId) {
+            const thread = await openai.beta.threads.create();
+            threadId = thread.id;
+            await storeThreadId(userId, threadId);
+        }
+
+        const assistant = await openai.beta.assistants.create({
+            name: "Raysun Capital Assistant",
+            instructions: "You are a financial assistant...",
+            tools: tools,
+            model: "gpt-4-1106-preview",
+        });
+
+        await openai.beta.threads.messages.create(threadId, {
+            role: "user",
+            content: userQuery
+        });
+
+        const run = await openai.beta.threads.runs.create(threadId, {
+            assistant_id: assistant.id,
+            instructions: "Please address the user as Munyaradzi Makosa",
+        });
+
+        let statusResult;
+        do {
+            statusResult = await checkStatusAndPrintMessages(threadId, run.id);
+            if (["requires_action", "in_progress"].includes(statusResult.status)) {
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+        } while (statusResult.status !== "completed");
+
+        // Optionally handle final messages here
+    } catch (error) {
+        console.error(`Error in processUserQuery: ${error}`);
+    }
+}
 
 async function checkStatusAndPrintMessages(threadId, runId) {
     try {
@@ -239,18 +278,11 @@ router.post('/', async (req, res) => {
         return res.status(400).send({ error: 'No query provided' });
     }
 
-    try {
-        let response = [];
-        let messages;
-        do {
-            messages = await main(userQuery, userId);
-            response = response.concat(messages);
-        } while (messages.length === 0); // Continue until messages are returned
+    res.send({ message: "Message received, processing..." });
 
-        res.send({ response });
-    } catch (error) {
-        // ... error handling
-    }
+    processUserQuery(userQuery, userId).catch(error => {
+        console.error(`Error processing query in background: ${error}`);
+    });
 });
 
 
