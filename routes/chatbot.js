@@ -3,6 +3,7 @@ const router = express.Router();
 const OpenAI = require('openai');
 const yahooFinance = require('yahoo-finance2').default;
 const User = require('../models/User');
+const applyForCivilServantLoan = require('../functions/civilservantloan');
 
 require('dotenv').config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -93,6 +94,56 @@ const tools = [
                 "required": ["loanAmount", "tenureMonths"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "applyForCivilServantLoan",
+            "description": "Apply for a civil servant loan and generate a PDF",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "fullName": { "type": "string", "description": "Applicant's full name" },
+                    "dob": { "type": "string", "description": "Date of birth in YYYY-MM-DD format" },
+                    "idNumber": { "type": "string", "description": "Identification number" },
+                    "nationality": { "type": "string", "description": "Nationality of the applicant" },
+                    "gender": { "type": "string", "description": "Gender of the applicant" },
+                    "position": { "type": "string", "description": "Position or job title of the applicant" },
+                    "grossIncome": { "type": "string", "description": "Gross income of the applicant"},
+                    "netIncome": { "type": "string", "description": "Net income of the applicant"},
+                    "maritalStatus": { "type": "string", "description": "Marital status of the applicant" },
+                    "phoneNumber": { "type": "string", "description": "Phone number of the applicant" },
+                    "email": { "type": "string", "description": "Email address of the applicant" },
+                    "ecNumber": { "type": "string", "description": "Employment Code number" },
+                    "addressStatus": { "type": "string", "description": "Housing status of the applicant (e.g., Owner, Renter)" },
+                    "address": { "type": "string", "description": "Home address of the applicant" },
+                    "timeAtAddress": { "type": "string", "description": "Duration of stay at the current address" },
+                    "dependants": { "type": "string", "description": "Number of dependants" },
+                    "employer": { "type": "string", "description": "Name of the employer" },
+                    "employerAddress": { "type": "string", "description": "Address of the employer" },
+                    "employerContactNumber": { "type": "string", "description": "Contact number of the employer" },
+                    "employerEmail": { "type": "string", "description": "Email address of the employer" },
+                    "periodWithEmployer": { "type": "string", "description": "Duration of employment with the current employer" },
+                    "nextOfKin": { "type": "string", "description": "Name of the next of kin" },
+                    "nextOfKinAddress": { "type": "string", "description": "Address of the next of kin" },
+                    "nextOfKinPhone": { "type": "string", "description": "Phone number of the next of kin" },
+                    "relationship": { "type": "string", "description": "Applicant's relationship to the next of kin" },
+                    "bankName": { "type": "string", "description": "Name of the applicant's bank" },
+                    "accountNumber": { "type": "string", "description": "Bank account number of the applicant" },
+                    "branchName": { "type": "string", "description": "Branch name of the bank" },
+                    "loanAmount": { "type": "number", "description": "Requested loan amount" },
+                    "loanTenure": { "type": "number", "description": "Loan tenure in months" },
+                },
+                "required": [
+                    "fullName", "dob", "idNumber", "nationality", "gender", 
+                    "maritalStatus", "phoneNumber", "email", "ecNumber", "addressStatus", 
+                    "address", "timeAtAddress", "dependants", "employer", "employerAddress", 
+                    "employerContactNumber", "periodWithEmployer", "nextOfKin", 
+                    "nextOfKinAddress", "nextOfKinPhone", "relationship", "bankName", 
+                    "accountNumber", "branchName", "loanAmount", "loanTenure"
+                ]
+            }
+        }
     }
 ];
 
@@ -165,11 +216,27 @@ async function processUserQuery(userQuery, userId) {
 
         const assistant = await openai.beta.assistants.create({
             name: "Raysun Capital Assistant",
-            instructions: "You are a financial assistant...",
+            instructions: `
+              You are Ray, a highly capable fintech assistant created by Raysun Capital. 
+              You specialize in providing financial services including loan applications, 
+              stock price inquiries, exchange rate information, and other general financial 
+              queries. 
+          
+              When users apply for loans, check stock prices, or inquire about exchange rates, 
+              you should engage interactively, requesting any additional information needed 
+              to fulfill their requests efficiently. For loan applications, ensure that all 
+              required fields are completed by prompting users for any missing information.
+          
+              Be attentive to user queries and provide precise, professional financial advice 
+              or information. If a user's request is unclear or incomplete, kindly ask for 
+              clarification to ensure you provide the most accurate and helpful response. 
+              Your goal is to facilitate a seamless and informative user experience, showcasing 
+              the range of fintech solutions offered by Raysun Capital.
+            `,
             tools: tools,
             model: "gpt-4-1106-preview",
-        });
-
+          });
+          
         await openai.beta.threads.messages.create(threadId, {
             role: "user",
             content: userQuery
@@ -221,8 +288,7 @@ async function checkStatusAndPrintMessages(threadId, runId) {
     }
 }
 
-// Function to perform required actions based on the run status
-async function performRequiredActions(requiredActions) {
+async function performRequiredActions(requiredActions, req) {
     let toolsOutput = [];
 
     for (const action of requiredActions) {
@@ -248,6 +314,16 @@ async function performRequiredActions(requiredActions) {
                 });
             } catch (error) {
                 console.error(`Error in calculateLoanInstallment: ${error}`);
+            }
+        } else if (funcName === "applyForCivilServantLoan") {
+            try {
+                const { loan, pdfUrl } = await applyForCivilServantLoan(functionArguments, req);
+                toolsOutput.push({
+                    tool_call_id: action.id,
+                    output: pdfUrl // Returning only the PDF URL
+                });
+            } catch (error) {
+                console.error(`Error in applyForCivilServantLoan: ${error}`);
             }
         } else {
             console.error(`Unknown function name: ${funcName}`);

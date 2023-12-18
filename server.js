@@ -5,8 +5,8 @@ const {log} = require("mercedlogger");
 const { v4: uuidv4 } = require('uuid'); 
 const cors = require("cors");
 const UserRouter = require("./controllers/user");
-
-const invoiceRoutes = require('./routes/invoice');
+const applyRoute = require("./routes/apply");
+ const invoiceRoutes = require('./routes/invoice');
 const userInfoRouter = require('./routes/userInfo');
 const withdrawRouter = require('./routes/withdraw');
 const { OpenAI} = require("openai")
@@ -161,208 +161,27 @@ app.post('/api/assistant', async (req, res) => {
 
 app.use('/chat', chatRouter);
 app.use('/', latestMessage);
+app.use('/apply', applyRoute);
 
 
 
 
-// Define the function to generate the assistant's reply
-async function generateAssistantReply(userId, prompt) {
-  try {
-    const gptResponse = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo-16k",
-      messages: userConversations[userId]
-    });
 
-    if (
-      gptResponse &&
-      gptResponse.data &&
-      gptResponse.data.choices &&
-      gptResponse.data.choices[0] &&
-      gptResponse.data.choices[0].message
-    ) {
-      return gptResponse.data.choices[0].message.content;
-    } else {
-      return 'No response from OpenAI.';
-    }
-  } catch (error) {
-    console.error('Error generating assistant reply:', error);
-    return 'An error occurred while generating a response.';
-  }
-}
 
-// Define the function to save the user's request
-async function saveUserRequest(requestId, prompt) {
-  try {
-    const response = new ResponseSchema({
-      requestId,
-      prompt,
-    });
 
-    await response.save();
 
-    return response;
-  } catch (error) {
-    console.error('Error saving user request:', error);
-    return null;
-  }
-}
+
+
+
+
+
+
+
+
+
 
 // Define the function to save the assistant's response
-async function saveAssistantResponse(requestId, prompt, assistantReply) {
-  try {
-    const existingResponse = await ResponseSchema.findOne({ requestId });
 
-    if (!existingResponse) {
-      // If a response with the given requestId doesn't exist, insert a new response
-      const response = new ResponseSchema({
-        requestId,
-        prompt,
-        message: assistantReply,
-      });
-
-      await response.save();
-
-      userConversations[userId].push({
-        "role": "assistant",
-        "content": assistantReply
-      });
-
-      mixpanelClient.track('Assistant Reply', {
-        distinct_id: userId,
-        message: assistantReply
-      });
-
-      return response;
-    } else {
-      console.log(`Response with requestId ${requestId} already exists.`);
-      return existingResponse;
-    }
-  } catch (error) {
-    console.error('Error saving assistant response:', error);
-    return null;
-  }
-}
-
-// Define the function to generate the assistant's reply
-async function generateAssistantReply(userId, prompt) {
-  try {
-    const gptResponse = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo-16k-0613",
-      messages: userConversations[userId]
-    });
-
-    if (
-      gptResponse &&
-      gptResponse.data &&
-      gptResponse.data.choices &&
-      gptResponse.data.choices[0] &&
-      gptResponse.data.choices[0].message
-    ) {
-      return gptResponse.data.choices[0].message.content;
-    } else {
-      return 'No response from OpenAI.';
-    }
-  } catch (error) {
-    console.error('Error generating assistant reply:', error);
-    return 'An error occurred while generating a response.';
-  }
-}
-
-// Define the function to save the user's request
-async function saveUserRequest(requestId, prompt) {
-  try {
-    const response = new ResponseSchema({
-      requestId,
-      prompt,
-    });
-
-    await response.save();
-
-    return response;
-  } catch (error) {
-    console.error('Error saving user request:', error);
-    return null;
-  }
-}
-
-// Define the function to save the assistant's response
-async function saveAssistantResponse(requestId, prompt, assistantReply) {
-  try {
-    const response = await ResponseSchema.findOneAndUpdate(
-      { requestId },
-      { message: assistantReply },
-      { new: true }
-    );
-
-    userConversations[userId].push({
-      "role": "assistant",
-      "content": assistantReply
-    });
-
-    mixpanelClient.track('Assistant Reply', {
-      distinct_id: userId,
-      message: assistantReply
-    });
-
-    return response;
-  } catch (error) {
-    console.error('Error saving assistant response:', error);
-    return null;
-  }
-}
-
-// Define the function to generate the assistant's reply
-async function generateAssistantReply(userId, prompt) {
-  try {
-    const gptResponse = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo-16k-0613",
-      messages: userConversations[userId]
-    });
-
-    if (
-      gptResponse &&
-      gptResponse.data &&
-      gptResponse.data.choices &&
-      gptResponse.data.choices[0] &&
-      gptResponse.data.choices[0].message
-    ) {
-      return gptResponse.data.choices[0].message.content;
-    } else {
-      return 'No response from OpenAI.';
-    }
-  } catch (error) {
-    console.error('Error generating assistant reply:', error);
-    return 'An error occurred while generating a response.';
-  }
-}
-
-// Define the function to save the assistant's response
-async function saveAssistantResponse(requestId, prompt, assistantReply) {
-  try {
-    const response = new ResponseSchema({
-      requestId,
-      prompt,
-      message: assistantReply,
-    });
-
-    await response.save();
-
-    userConversations[userId].push({
-      "role": "assistant",
-      "content": assistantReply
-    });
-
-    mixpanelClient.track('Assistant Reply', {
-      distinct_id: userId,
-      message: assistantReply
-    });
-
-    return response;
-  } catch (error) {
-    console.error('Error saving assistant response:', error);
-    return null;
-  }
-}
 
 
 
