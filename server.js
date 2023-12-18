@@ -19,6 +19,7 @@ const axios = require('axios')
 const chatRouter = require('./routes/chatbot')
 const latestMessage = require('./routes/lastestmessage')
 const cron = require('node-cron');
+const fs = require('fs')
 
 
 
@@ -175,9 +176,16 @@ async function fetchData() {
   }
 }
 // Schedule the task to run every day at 8 AM (adjust the time as needed)
-cron.schedule('0 8 * * *', () => {
-  console.log('Running a task every day at 8 AM');
-  fetchData();
+cron.schedule('0 12 * * *', async () => {
+  try {
+      const response = await axios.get('https://a.success.africa/api/rates/fx-rates');
+      fs.writeFileSync('fxRates.json', JSON.stringify(response.data));
+  } catch (error) {
+      console.error('Error fetching and writing FX rates:', error);
+  }
+}, {
+  scheduled: true,
+  timezone: "CAT"
 });
 
 
