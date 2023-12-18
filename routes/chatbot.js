@@ -4,9 +4,16 @@ const OpenAI = require('openai');
 const yahooFinance = require('yahoo-finance2').default;
 const User = require('../models/User');
 const applyForCivilServantLoan = require('../functions/civilservantloan');
-
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+const cancelRun = require('../functions/cancelRun');
 require('dotenv').config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+
+
+
 
 async function getStockPrice(symbol) {
     try {
@@ -18,6 +25,15 @@ async function getStockPrice(symbol) {
         };
     } catch (error) {
         console.error(`Error fetching stock price for ${symbol}: ${error}`);
+        throw error;
+    }
+}
+async function getExchangeRates() {
+    try {
+        const response = await axios.get('https://a.success.africa/api/rates/fx-rates');
+        return response.data; // or process the data as needed
+    } catch (error) {
+        console.error(`Error fetching exchange rates: ${error}`);
         throw error;
     }
 }
@@ -144,68 +160,26 @@ const tools = [
                 ]
             }
         }
-    }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "getExchangeRates",
+            "description": "Fetch the current exchange rates",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    },
+
 ];
 
-async function main(userQuery, userId) {
-    try {
 
-        let threadId = await getStoredThreadId(userId);
-        console.log('threadId', threadId)
-        // If no existing thread, create a new one
-        if (!threadId) {
-            const thread = await openai.beta.threads.create();
-            threadId = thread.id;
-            console.log('new thread created')
-            // Store the new thread ID for future reference
-            await storeThreadId(userId, threadId);
-        }
-
-        // Create the assistant
-        const assistant = await openai.beta.assistants.create({
-            name: "Raysun Capital Assistant",
-            instructions: "You are a financial assistant. Provide accurate and professional advice on stock prices, loan calculations, and general financial queries. Always ask for clarification if the user's request is incomplete or unclear.",
-            tools: tools,
-            model: "gpt-4-1106-preview",
-        });
-
-        
-        // Create a message in the thread
-        await openai.beta.threads.messages.create(threadId, {
-            role: "user",
-            content: userQuery
-        });
-
-        // Create a run with custom instructions
-        const run = await openai.beta.threads.runs.create(threadId, {
-            assistant_id: assistant.id,
-            instructions: "Please address the user as Munyaradzi Makosa",
-        });
-
-        let finalMessages = [];
-        let statusResult;
-        do {
-            statusResult = await checkStatusAndPrintMessages(threadId, run.id);
-            if (statusResult.status === "completed") {
-                finalMessages = statusResult.messages;
-            } else if (statusResult.status === "requires_action") {
-                // Handle any required actions after 'requires_action'
-                // Logic for handling actions goes here
-                await new Promise(resolve => setTimeout(resolve, 5000));
-            } else if (statusResult.status === "in_progress") {
-                // Wait and recheck status
-                await new Promise(resolve => setTimeout(resolve, 5000));
-            }
-        } while (statusResult.status !== "completed");
-
-        return finalMessages;
-    } catch (error) {
-        console.error(`Error in main: ${error}`);
-        throw error;
-    }
-}
 
 async function processUserQuery(userQuery, userId) {
+    let runId;
     try {
         let threadId = await getStoredThreadId(userId);
         if (!threadId) {
@@ -238,6 +212,7 @@ async function processUserQuery(userQuery, userId) {
             assistant_id: assistant.id,
             instructions: "Please address the user as Munyaradzi Makosa",
         });
+        runId = run.id;
 
         let statusResult;
         do {
@@ -250,6 +225,9 @@ async function processUserQuery(userQuery, userId) {
         // Optionally handle final messages here
     } catch (error) {
         console.error(`Error in processUserQuery: ${error}`);
+        if (threadId && runId) {
+            await cancelRun(threadId, runId).catch(cancelError => console.error(`Error cancelling run: ${cancelError}`));
+        }
     }
 }
 
@@ -317,7 +295,18 @@ async function performRequiredActions(requiredActions, req) {
             } catch (error) {
                 console.error(`Error in applyForCivilServantLoan: ${error}`);
             }
-        } else {
+        }else if (funcName === "getExchangeRates") {
+            try {
+                const output = await getExchangeRates();
+                toolsOutput.push({
+                    tool_call_id: action.id,
+                    output: JSON.stringify(output)
+                });
+            } catch (error) {
+                console.error(`Error in getExchangeRates: ${error}`);
+            }
+        } 
+        else {
             console.error(`Unknown function name: ${funcName}`);
         }
     }
