@@ -15,9 +15,11 @@ const mixpanelToken = 'c08415fd158425a0180c1036e50af0e0';
 const mixpanelClient = mixpanel.init(mixpanelToken);
 const LoanApplication = require('./controllers/LoanApplication');
 const loanRoutes = require('./controllers/PersonalLoans');
-const ResponseSchema = require('./models/response')
+const axios = require('axios')
 const chatRouter = require('./routes/chatbot')
 const latestMessage = require('./routes/lastestmessage')
+const cron = require('node-cron');
+
 
 
 const openai = new OpenAI({
@@ -162,6 +164,21 @@ app.post('/api/assistant', async (req, res) => {
 app.use('/chat', chatRouter);
 app.use('/', latestMessage);
 app.use('/apply', applyRoute);
+
+// Function to fetch data from the API
+async function fetchData() {
+  try {
+      const response = await axios.get('https://a.success.africa/api/rates/fx-rates');
+      // Process and store the response as needed
+  } catch (error) {
+      console.error('Error fetching data:', error);
+  }
+}
+// Schedule the task to run every day at 8 AM (adjust the time as needed)
+cron.schedule('0 8 * * *', () => {
+  console.log('Running a task every day at 8 AM');
+  fetchData();
+});
 
 
 
