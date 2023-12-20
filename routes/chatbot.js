@@ -31,11 +31,22 @@ async function getStockPrice(symbol) {
 async function getExchangeRates() {
     try {
         const response = await axios.get('https://a.success.africa/api/rates/fx-rates');
-        return response.data; // or process the data as needed
+        return response.data; 
     } catch (error) {
         console.error(`Error fetching exchange rates: ${error}`);
         throw error;
     }
+}
+
+async function getZimStocks(){
+    try {
+        const response = await axios.get('https://ctrade.co.zw/mobileapi/marketwatchzsenew');
+        return response.data;
+
+    } catch (error) {
+        console.error(` Error fetching exchnage rates ; ${error} `)
+    }
+
 }
 async function calculateLoanInstallment({ loanAmount, tenureMonths }) {
     const interestRate = 0.10; // Fixed annual interest rate of 10%
@@ -73,6 +84,18 @@ async function storeThreadId(userId, threadId) {
 }
 
 const tools = [
+    {
+        "type": "function",
+        "function" : {
+            "name" : "getZimStocks",
+            "description" : "Get the current stock price of a Zimbabwean company using its name",
+            "parameters" : {
+                "type" : "object",
+                "properties" : {},
+                "required" : []
+            }
+        }
+    },
     {
         "type": "function",
         "function": {
@@ -210,7 +233,7 @@ async function processUserQuery(userQuery, userId) {
 
         const run = await openai.beta.threads.runs.create(threadId, {
             assistant_id: assistant.id,
-            instructions: "Please address the user as Munyaradzi Makosa",
+            instructions: "Please address the user's question in full.",
         });
         runId = run.id;
 
@@ -265,17 +288,7 @@ async function performRequiredActions(requiredActions, req) {
         const funcName = action.function.name;
         const functionArguments = JSON.parse(action.function.arguments);
 
-        if (funcName === "getStockPrice") {
-            try {
-                const output = await getStockPrice(functionArguments.symbol);
-                toolsOutput.push({
-                    tool_call_id: action.id,
-                    output: JSON.stringify(output)
-                });
-            } catch (error) {
-                console.error(`Error in getStockPrice: ${error}`);
-            }
-        } else if (funcName === "calculateLoanInstallment") {
+        if (funcName === "calculateLoanInstallment") {
             try {
                 const output = await calculateLoanInstallment(functionArguments);
                 toolsOutput.push({
@@ -305,7 +318,18 @@ async function performRequiredActions(requiredActions, req) {
             } catch (error) {
                 console.error(`Error in getExchangeRates: ${error}`);
             }
-        } 
+        } else if (funcName === "getZimStocks" ) {
+            try{ 
+                const output = await getZimStocks();
+                toolsOutput.push({
+                    tool_call_id: action.id,
+                    output: JSON.stringify(output)
+                });
+            }
+            catch (error) {
+                console.error(`Error in getZimStocks: ${error}`);
+            }
+        }
         else {
             console.error(`Unknown function name: ${funcName}`);
         }
