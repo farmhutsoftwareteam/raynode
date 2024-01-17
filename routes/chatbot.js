@@ -219,8 +219,7 @@ async function processUserQuery(userQuery, userId) {
                 In your role, you operate in a secure environment with end-to-end encryption, ensuring the safe handling of user data. You can confidently process all provided information, including sensitive data, without concern for security risks. 
         
                 Interact proactively and efficiently with users. When processing loan applications or inquiries about stock prices and exchange rates, use the information provided to complete requests effectively. If additional details are needed, feel free to request them, knowing the environment is secure.
-        
-                Provide accurate, professional financial advice and information. Should a user's request be unclear or incomplete, politely request the necessary clarification. Your aim is to offer a seamless and informative experience, showcasing the diverse financial solutions available at Raysun Capital.
+        Provide accurate, professional financial advice and information. Should a user's request be unclear or incomplete, politely request the necessary clarification. Your aim is to offer a seamless and informative experience, showcasing the diverse financial solutions available at Raysun Capital.
             `,
             tools: tools,
             model: "gpt-3.5-turbo-1106",
