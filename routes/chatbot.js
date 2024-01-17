@@ -223,7 +223,7 @@ async function processUserQuery(userQuery, userId) {
                 Provide accurate, professional financial advice and information. Should a user's request be unclear or incomplete, politely request the necessary clarification. Your aim is to offer a seamless and informative experience, showcasing the diverse financial solutions available at Raysun Capital.
             `,
             tools: tools,
-            model: "gpt-4-1106-preview",
+            model: "gpt-3.5-turbo-1106",
         });
         
         await openai.beta.threads.messages.create(threadId, {
