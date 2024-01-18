@@ -232,7 +232,7 @@ async function processUserQuery(userQuery, userId) {
 
         const run = await openai.beta.threads.runs.create(threadId, {
             assistant_id: assistant.id,
-            instructions: "Please address the user's question in full.",
+            instructions: "Please address the user's question in full please.",
         });
         runId = run.id;
 
