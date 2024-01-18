@@ -200,15 +200,23 @@ const tools = [
 ];
 
 
-
+//anytime the OPENAI KEY CHANGES you will have unmatching threadIDS this will cause a 404 error
+//i still don't have any logical solution for this, currently writing an external function
+//to delete all the existing threadIds from db
 async function processUserQuery(userQuery, userId) {
     let runId;
     try {
+        console.log(`Retrieving stored thread ID for user ID: ${userId}`);
+
         let threadId = await getStoredThreadId(userId);
+        console.log(`Retrieved thread ID: ${threadId}`);
         if (!threadId) {
+            console.log(`No thread ID found, creating a new thread.`);
             const thread = await openai.beta.threads.create();
+
             threadId = thread.id;
             await storeThreadId(userId, threadId);
+            console.log(`New thread ID created: ${threadId}`);
         }
 
         const assistant = await openai.beta.assistants.create({
