@@ -12,7 +12,20 @@ require('dotenv').config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 
+async function calculateLoanInstallmentRepeatClient(loanAmount, tenure) {
+    const interestRate = 10;
 
+    const tenuredInterestRate = interestRate * tenure;
+
+    const interest = (tenuredInterestRate/100) * loanAmount;
+
+    const totalAmount = loanAmount + interest;
+
+    const monthlyInstallment = totalAmount / tenure;
+
+    console.log(monthlyInstallment)
+
+}
 
 
 async function getStockPrice(symbol) {
@@ -46,8 +59,8 @@ async function getZimStocks(){
     } catch (error) {
         console.error(` Error fetching exchnage rates ; ${error} `)
     }
-
 }
+
 async function calculateLoanInstallment({ loanAmount, tenureMonths }) {
     const interestRate = 0.10; // Fixed annual interest rate of 10%
     const monthlyRate = interestRate / 12; // Convert annual rate to monthly rate
