@@ -25,6 +25,7 @@
     "morgan": "^1.10.0",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.0",
+    "odbc": "^2.4.8",
     "openai": "^4.21.0",
     "passport": "^0.6.0",
     "passport-google-oauth": "^2.0.0",
