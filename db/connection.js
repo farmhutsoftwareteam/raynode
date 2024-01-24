@@ -15,4 +15,4 @@ mongoose.connection
 .on("error", (error) => log.red("DATABASE STATE", error))
 
 // EXPORT CONNECTION
-module.exports = mongoose
+module.exports = mongoose;
