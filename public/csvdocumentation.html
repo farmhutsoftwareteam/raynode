@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV Documentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div id="content"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const contentElement = document.getElementById('content');
+            // Fetch the Markdown documentation
+            fetch('csvdocumentation.md')
+                .then(response => response.text())
+                .then(text => {
+                    // Convert Markdown to HTML
+                    contentElement.innerHTML = marked.parse(text);
+                });
+        });
+    </script>
+</body>
+</html>
