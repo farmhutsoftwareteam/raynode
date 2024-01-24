@@ -20,6 +20,8 @@ const chatRouter = require('./routes/chatbot')
 const latestMessage = require('./routes/lastestmessage')
 const cron = require('node-cron');
 const fs = require('fs')
+const uploadCsvRoute = require('./routes/getLoanData');
+
 
 
 
@@ -85,7 +87,7 @@ app.use('/user-info', userInfoRouter);
 app.use('/withdraw', withdrawRouter);
 // Use loan routes
 app.use('/api', loanRoutes);
-
+app.use('/', uploadCsvRoute);
 
 app.use("/loan", LoanApplication) // send all "/loan" requests to LoanApplication for routing
 
