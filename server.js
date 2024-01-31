@@ -20,7 +20,7 @@ const chatRouter = require('./routes/chatbot')
 const latestMessage = require('./routes/lastestmessage')
 const cron = require('node-cron');
 const fs = require('fs')
-const uploadCsvRoute = require('./routes/getLoanData');
+const uploadCsvRoute = require('./routes/processFiles');
 
 
 
