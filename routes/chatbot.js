@@ -25,7 +25,7 @@ async function calculateLoanInstallmentRepeatClient(loanAmount, tenure) {
 
     console.log(monthlyInstallment)
 
-}
+} 
 
 
 async function getStockPrice(symbol) {
