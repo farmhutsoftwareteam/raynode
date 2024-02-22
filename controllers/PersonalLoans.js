@@ -61,9 +61,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
-
-
 // Function to send loan information to webhook and email
 async function sendWebhookAndEmail(loan, pdfUrl) {
   const webhookUrl = 'https://flows.messagebird.com/flows/c8016044-89b0-4b85-9262-8830a0b46554/invoke';
