@@ -37,7 +37,7 @@ const transporter = nodemailer.createTransport({
   secure: false,
   auth: {
     user: 'ray@raysuncapital.com',
-    pass: 'C623EEFECACB8B8BBB11FEAE1927262519AF',
+    pass: 'inxo ovum ovul lijp',
   },
 });
 
