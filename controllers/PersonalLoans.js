@@ -52,9 +52,10 @@ const generateLoanPDF = async (loan) => {
 
 // Configure the transporter for sending emails
 const transporter = nodemailer.createTransport({
-  host: 'smtp.elasticemail.com',
-  port: 2525,
-  secure: false,
+  service: "Gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: 'ray@raysuncapital.com',
     pass: 'inxo ovum ovul lijp',
