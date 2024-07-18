@@ -279,7 +279,7 @@ router.put("/loan/:id/approve", async (req, res) => {
 
     await transporter.sendMail({
       from: 'ray@raysuncapital.com',
-      to: 'munya@farmhutafrica.com',
+      to: 'sean@raysuncapital.com',
       subject: emailSubject,
       text: emailMessage,
     });

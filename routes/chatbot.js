@@ -57,7 +57,7 @@ async function getZimStocks(){
         return response.data;
 
     } catch (error) {
-        console.error(` Error fetching exchnage rates ; ${error} `)
+        console.error(` Error fetching exchange rates ; ${error} `)
     }
 }
 
